@@ -1,10 +1,11 @@
 #include <stdio.h>
 
-int main(){
+int main()
+{
     int x;
     float y;
-    scanf("%3d%f",&x,&y);
-    printf("%d",x)
+    scanf("%3d%f", &x, &y);
+    printf("%d", x);
 
     return 0;
 }
