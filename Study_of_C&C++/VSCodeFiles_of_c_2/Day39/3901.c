@@ -1,238 +1,228 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <malloc.h>
+#include <windows.h>
 
 typedef struct Node
 {
     int data;
     struct Node *next;
-} Node;
+} Node, *LinkList;
 
-typedef struct LinkedList
+void freeList(LinkList L)
 {
-    Node *head;
-} LinkedList;
-
-LinkedList *create()
-{
-    LinkedList *list = (LinkedList *)malloc(sizeof(LinkedList));
-    list->head = NULL;
-    return list;
+    Node *current = L;
+    Node *nextNode;
+    while (current != NULL)
+    {
+        nextNode = current->next;
+        free(current);
+        current = nextNode;
+    }
 }
 
-LinkedList *append(LinkedList *list, int data)
+void createList(LinkList *L, int arr[], int n)
 {
-    Node *node = (Node *)malloc(sizeof(Node));
-    node->data = data;
-    node->next = NULL;
-    if (list->head == NULL)
+    *L = (LinkList)malloc(sizeof(Node));
+    if (*L == NULL)
     {
-        list->head = node;
+        perror("为头节点分配内存失败");
+        exit(EXIT_FAILURE);
     }
-    else
+    (*L)->next = NULL;
+    Node *current = *L;
+    for (int i = 0; i < n; i++)
     {
-        Node *temp = list->head;
-        while (temp->next != NULL)
+        Node *newNode = (Node *)malloc(sizeof(Node));
+        if (newNode == NULL)
         {
-            temp = temp->next;
+            perror("为新节点分配内存失败");
+            freeList(*L); // 清理已分配的内存
+            exit(EXIT_FAILURE);
         }
-        temp->next = node;
+        newNode->data = arr[i];
+        newNode->next = NULL;
+        current->next = newNode;
+        current = newNode;
     }
-    return list;
 }
 
-LinkedList *delete(LinkedList *list, int data)
+// 函数：打印链表
+void printList(LinkList L, const char *name)
 {
-    if (list->head == NULL)
+    printf("%s = ", name);
+    Node *current = L->next;
+    while (current != NULL)
     {
-        return list;
-    }
-    if (list->head->data == data)
-    {
-        Node *temp = list->head;
-        list->head = list->head->next;
-        free(temp);
-        return list;
-    }
-    Node *temp = list->head;
-    while (temp->next != NULL)
-    {
-        if (temp->next->data == data)
+        printf("%d", current->data);
+        if (current->next != NULL)
         {
-            Node *del = temp->next;
-            temp->next = del->next;
-            free(del);
-            return list;
-        }
-        temp = temp->next;
-    }
-    return list;
-}
-
-// 按序合并两个有序链表，将list_b合并到list_a中
-LinkedList *merge(LinkedList *list_a, LinkedList *list_b)
-{
-    // 如果list_b为空，直接返回list_a
-    if (list_b->head == NULL)
-    {
-        return list_a;
-    }
-    
-    // 如果list_a为空，将list_b的所有节点移动到list_a
-    if (list_a->head == NULL)
-    {
-        list_a->head = list_b->head;
-        list_b->head = NULL;
-        return list_a;
-    }
-    
-    // 创建一个虚拟头节点，简化合并逻辑
-    Node dummy;
-    dummy.next = NULL;
-    Node *current = &dummy;
-    
-    Node *ptr_a = list_a->head;
-    Node *ptr_b = list_b->head;
-    
-    // 合并两个有序链表
-    while (ptr_a != NULL && ptr_b != NULL)
-    {
-        if (ptr_a->data <= ptr_b->data)
-        {
-            current->next = ptr_a;
-            ptr_a = ptr_a->next;
-        }
-        else
-        {
-            current->next = ptr_b;
-            ptr_b = ptr_b->next;
+            printf(",");
         }
         current = current->next;
-    }
-    
-    // 连接剩余的节点
-    if (ptr_a != NULL)
-    {
-        current->next = ptr_a;
-    }
-    else
-    {
-        current->next = ptr_b;
-    }
-    
-    // 更新list_a的头节点
-    list_a->head = dummy.next;
-    
-    // 清空list_b的头节点（节点已经被移动到list_a）
-    list_b->head = NULL;
-    
-    return list_a;
-}
-
-// 集合化
-LinkedList *set(LinkedList *list)
-{
-    if (list->head == NULL)
-    {
-        return list;
-    }
-    Node *temp = list->head;
-    while (temp->next != NULL)
-    {
-        if (temp->data == temp->next->data)
-        {
-            Node *duplicate = temp->next;
-            temp->next = duplicate->next;
-            free(duplicate);
-        }
-        else
-        {
-            temp = temp->next;
-        }
-    }
-    return list;
-}
-
-LinkedList *clear(LinkedList *list)
-{
-    if (list->head == NULL)
-    {
-        return list;
-    }
-    Node *temp = list->head;
-    while (temp != NULL)
-    {
-        Node *del = temp;
-        temp = temp->next;
-        free(del);
-    }
-    list->head = NULL;
-    return list;
-}
-
-void print(LinkedList *list)
-{
-    if (list->head == NULL)
-    {
-        printf("NULL\n");
-        return;
-    }
-    Node *temp = list->head;
-    while (temp != NULL)
-    {
-        printf("%d ", temp->data);
-        temp = temp->next;
     }
     printf("\n");
 }
 
+// 算法2.1的实现: 将Lb中不存在于La的元素插入到La中
+void unionList(LinkList La, LinkList Lb)
+{
+    Node *pa = La->next;
+    Node *pb = Lb->next;
+    Node *prev_pa = La;
+
+    while (pa != NULL && pb != NULL)
+    {
+        if (pa->data < pb->data)
+        {
+            prev_pa = pa;
+            pa = pa->next;
+        }
+        else if (pa->data > pb->data)
+        {
+            Node *newNode = (Node *)malloc(sizeof(Node));
+            if (newNode == NULL)
+            {
+                perror("在 unionList 中分配内存失败");
+                return;
+            }
+            newNode->data = pb->data;
+            newNode->next = pa;
+            prev_pa->next = newNode;
+            prev_pa = newNode;
+            pb = pb->next;
+        }
+        else
+        { // pa->data == pb->data
+            prev_pa = pa;
+            pa = pa->next;
+            pb = pb->next;
+        }
+    }
+    // 如果Lb还有剩余元素，将它们附加到La的末尾
+    if (pb != NULL)
+    {
+        prev_pa->next = pb;
+    }
+    // Lb的头节点现在是孤立的，其节点已成为La的一部分。
+    // 我们将Lb的头节点的next设置为空，表示它已被消耗。
+    Lb->next = NULL;
+}
+
+// 算法2.2的修改版: 合并两个有序链表La和Lb到Lc
+void mergeList(LinkList La, LinkList Lb, LinkList *Lc)
+{
+    *Lc = (LinkList)malloc(sizeof(Node));
+    if (*Lc == NULL)
+    {
+        perror("为Lc头节点分配内存失败");
+        exit(EXIT_FAILURE);
+    }
+    (*Lc)->next = NULL;
+    Node *pc = *Lc;
+    Node *pa = La->next;
+    Node *pb = Lb->next;
+
+    // 这个合并操作重用了La和Lb的节点
+    while (pa != NULL && pb != NULL)
+    {
+        if (pa->data <= pb->data)
+        {
+            pc->next = pa;
+            pc = pa;
+            pa = pa->next;
+        }
+        else
+        {
+            pc->next = pb;
+            pc = pb;
+            pb = pb->next;
+        }
+    }
+    pc->next = (pa != NULL) ? pa : pb;
+
+    // 将原始列表标记为空，因为它们的节点现在在Lc中
+    La->next = NULL;
+    Lb->next = NULL;
+}
+
+// 函数：删除有序链表中的重复元素
+void deduplicateList(LinkList L)
+{
+    if (L == NULL || L->next == NULL)
+        return;
+    Node *current = L->next;
+    while (current != NULL && current->next != NULL)
+    {
+        if (current->data == current->next->data)
+        {
+            Node *temp = current->next;
+            current->next = temp->next;
+            free(temp); // 释放重复的节点
+        }
+        else
+        {
+            current = current->next;
+        }
+    }
+}
+
 int main()
 {
-    LinkedList *la = create();
-    for (int i = 1; i <= 5; i++)
-        append(la, i);
+    // 设置控制台输出代码页为UTF-8以正确显示中文字符
+    SetConsoleOutputCP(65001);
 
-    LinkedList *lb = create();
-    for (int i = 2; i <= 10; i += 2)
-        append(lb, i);
+    // 初始数据
+    int arr_a[] = {1, 2, 3, 4, 5};
+    int arr_b[] = {2, 4, 6, 8, 10};
+    LinkList La, Lb;
+    createList(&La, arr_a, 5);
+    createList(&Lb, arr_b, 5);
 
-    print(la);
-    print(lb);
+    printf("初始链表:\n");
+    printList(La, "La");
+    printList(Lb, "Lb");
+    printf("\n");
 
-    LinkedList *lm = create();
-    // 先将la的内容复制到lm中
-    Node *temp = la->head;
-    while (temp != NULL)
-    {
-        append(lm, temp->data);
-        temp = temp->next;
-    }
-    // 然后将lb合并到lm中
-    merge(lm, lb);
-    set(lm);
-    clear(la);
-    print(lm);
+    // (1) 执行算法2.1
+    unionList(La, Lb);
+    printf("(1) 算法 2.1 执行后:\n");
+    printList(La, "new La");
+    printf("\n");
+    // Lb的节点现在在La中，释放Lb的孤立头节点
+    free(Lb);
 
-    clear(lb);
-    append(lb, 2);
-    append(lb, 6);
-    append(lb, 8);
-    append(lb, 9);
-    append(lb, 11);
-    append(lb, 15);
-    append(lb, 20);
-    print(lb);
+    // (2) 修改Lb并与新的La合并
+    int arr_b_new[] = {2, 6, 8, 9, 11, 15, 20};
+    LinkList Lb_new, Lc;
+    createList(&Lb_new, arr_b_new, 7);
 
-    LinkedList *lc = create();
-    // 先将la的内容复制到lc中（此时la已经被清空）
-    temp = la->head;
-    while (temp != NULL)
-    {
-        append(lc, temp->data);
-        temp = temp->next;
-    }
-    // 然后将lb合并到lc中
-    merge(lc, lb);
-    print(lc);
+    int arr_a_new[] = {1, 2, 3, 4, 5, 6, 8, 10};
+    LinkList La_new;
+    createList(&La_new, arr_a_new, 8);
+
+    printf("(2) 准备合并的链表:\n");
+    printList(La_new, "La_new");
+    printList(Lb_new, "Lb_new");
+
+    mergeList(La_new, Lb_new, &Lc);
+    printf("合并后:\n");
+    printList(Lc, "Lc");
+    printf("\n");
+    // La_new和Lb_new已被消耗，释放它们的孤立头节点
+    free(La_new);
+    free(Lb_new);
+
+    // (3) 从Lc中删除重复元素
+    deduplicateList(Lc);
+    printf("(3) 删除重复元素后:\n");
+    printList(Lc, "Lc_deduplicated");
+    printf("\n");
+
+    // 释放所有分配的内存
+    printf("正在释放内存...\n");
+    freeList(La); // 释放第一个列表
+    freeList(Lc); // 释放最终合并和去重后的列表
+    printf("内存已释放。\n");
+
     return 0;
 }
