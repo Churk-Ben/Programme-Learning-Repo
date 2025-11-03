@@ -23,22 +23,11 @@ void freeList(LinkList L)
 void createList(LinkList *L, int arr[], int n)
 {
     *L = (LinkList)malloc(sizeof(Node));
-    if (*L == NULL)
-    {
-        perror("为头节点分配内存失败");
-        exit(EXIT_FAILURE);
-    }
     (*L)->next = NULL;
     Node *current = *L;
     for (int i = 0; i < n; i++)
     {
         Node *newNode = (Node *)malloc(sizeof(Node));
-        if (newNode == NULL)
-        {
-            perror("为新节点分配内存失败");
-            freeList(*L); // 清理已分配的内存
-            exit(EXIT_FAILURE);
-        }
         newNode->data = arr[i];
         newNode->next = NULL;
         current->next = newNode;
@@ -46,7 +35,6 @@ void createList(LinkList *L, int arr[], int n)
     }
 }
 
-// 函数：打印链表
 void printList(LinkList L, const char *name)
 {
     printf("%s = ", name);
@@ -63,7 +51,7 @@ void printList(LinkList L, const char *name)
     printf("\n");
 }
 
-// 算法2.1的实现: 将Lb中不存在于La的元素插入到La中
+// 有序去重合并
 void unionList(LinkList La, LinkList Lb)
 {
     Node *pa = La->next;
@@ -80,11 +68,6 @@ void unionList(LinkList La, LinkList Lb)
         else if (pa->data > pb->data)
         {
             Node *newNode = (Node *)malloc(sizeof(Node));
-            if (newNode == NULL)
-            {
-                perror("在 unionList 中分配内存失败");
-                return;
-            }
             newNode->data = pb->data;
             newNode->next = pa;
             prev_pa->next = newNode;
@@ -92,37 +75,30 @@ void unionList(LinkList La, LinkList Lb)
             pb = pb->next;
         }
         else
-        { // pa->data == pb->data
+        {
             prev_pa = pa;
             pa = pa->next;
             pb = pb->next;
         }
     }
-    // 如果Lb还有剩余元素，将它们附加到La的末尾
+
     if (pb != NULL)
     {
         prev_pa->next = pb;
     }
-    // Lb的头节点现在是孤立的，其节点已成为La的一部分。
-    // 我们将Lb的头节点的next设置为空，表示它已被消耗。
+
     Lb->next = NULL;
 }
 
-// 算法2.2的修改版: 合并两个有序链表La和Lb到Lc
+// 有序不去重合并
 void mergeList(LinkList La, LinkList Lb, LinkList *Lc)
 {
     *Lc = (LinkList)malloc(sizeof(Node));
-    if (*Lc == NULL)
-    {
-        perror("为Lc头节点分配内存失败");
-        exit(EXIT_FAILURE);
-    }
     (*Lc)->next = NULL;
     Node *pc = *Lc;
     Node *pa = La->next;
     Node *pb = Lb->next;
 
-    // 这个合并操作重用了La和Lb的节点
     while (pa != NULL && pb != NULL)
     {
         if (pa->data <= pb->data)
@@ -140,13 +116,12 @@ void mergeList(LinkList La, LinkList Lb, LinkList *Lc)
     }
     pc->next = (pa != NULL) ? pa : pb;
 
-    // 将原始列表标记为空，因为它们的节点现在在Lc中
     La->next = NULL;
     Lb->next = NULL;
 }
 
-// 函数：删除有序链表中的重复元素
-void deduplicateList(LinkList L)
+// 去重
+void set(LinkList L)
 {
     if (L == NULL || L->next == NULL)
         return;
@@ -157,7 +132,6 @@ void deduplicateList(LinkList L)
         {
             Node *temp = current->next;
             current->next = temp->next;
-            free(temp); // 释放重复的节点
         }
         else
         {
@@ -183,15 +157,14 @@ int main()
     printList(Lb, "Lb");
     printf("\n");
 
-    // (1) 执行算法2.1
+    // 有序去重合并
     unionList(La, Lb);
-    printf("(1) 算法 2.1 执行后:\n");
+    printf("有序去重合并后:\n");
     printList(La, "new La");
     printf("\n");
-    // Lb的节点现在在La中，释放Lb的孤立头节点
     free(Lb);
 
-    // (2) 修改Lb并与新的La合并
+    // 有序不去重合并
     int arr_b_new[] = {2, 6, 8, 9, 11, 15, 20};
     LinkList Lb_new, Lc;
     createList(&Lb_new, arr_b_new, 7);
@@ -200,29 +173,24 @@ int main()
     LinkList La_new;
     createList(&La_new, arr_a_new, 8);
 
-    printf("(2) 准备合并的链表:\n");
+    printf("有序不去重合并前:\n");
     printList(La_new, "La_new");
     printList(Lb_new, "Lb_new");
 
     mergeList(La_new, Lb_new, &Lc);
-    printf("合并后:\n");
+    printf("有序不去重合并后:\n");
     printList(Lc, "Lc");
     printf("\n");
-    // La_new和Lb_new已被消耗，释放它们的孤立头节点
     free(La_new);
     free(Lb_new);
 
-    // (3) 从Lc中删除重复元素
-    deduplicateList(Lc);
-    printf("(3) 删除重复元素后:\n");
-    printList(Lc, "Lc_deduplicated");
+    // 集合化
+    set(Lc);
+    printf("集合化:\n");
+    printList(Lc, "Lc_set");
     printf("\n");
-
-    // 释放所有分配的内存
-    printf("正在释放内存...\n");
-    freeList(La); // 释放第一个列表
-    freeList(Lc); // 释放最终合并和去重后的列表
-    printf("内存已释放。\n");
+    freeList(La);
+    freeList(Lc);
 
     return 0;
 }
