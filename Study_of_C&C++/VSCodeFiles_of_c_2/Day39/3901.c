@@ -132,6 +132,7 @@ void set(LinkList L)
         {
             Node *temp = current->next;
             current->next = temp->next;
+            free(temp);
         }
         else
         {
