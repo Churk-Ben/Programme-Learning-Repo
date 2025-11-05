@@ -1,5 +1,30 @@
 {
     "files.associations": {
-        "limits": "c"
+        "*.dbclient-js": "javascript",
+        "limits": "c",
+        "xstring": "cpp",
+        "stack": "cpp",
+        "memory": "cpp",
+        "system_error": "cpp",
+        "xmemory": "cpp",
+        "atomic": "cpp",
+        "type_traits": "cpp",
+        "charconv": "cpp",
+        "cmath": "cpp",
+        "deque": "cpp",
+        "format": "cpp",
+        "tuple": "cpp",
+        "utility": "cpp",
+        "xlocale": "cpp",
+        "xlocnum": "cpp",
+        "xiosbase": "cpp",
+        "xutility": "cpp",
+        "iostream": "cpp",
+        "xloctime": "cpp",
+        "iterator": "cpp",
+        "istream": "cpp",
+        "xlocbuf": "cpp",
+        "xlocmon": "cpp",
+        "*.rh": "cpp"
     }
 }
