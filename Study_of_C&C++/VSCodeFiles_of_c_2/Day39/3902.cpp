@@ -2,6 +2,10 @@
 #include <string>
 #include <windows.h>
 
+#include <stack>
+
+stack<int> st;
+
 using namespace std;
 
 string MAP[16] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"};
@@ -14,7 +18,7 @@ typedef struct Stack
 } Stack;
 
 // 初始化栈
-void init_stack(Stack &st)
+void init(Stack &st)
 {
 	st.top = -1;
 }
@@ -41,7 +45,7 @@ bool empty(Stack &st)
 string num_transfer(string num, int p)
 {
 	Stack pn;
-	init_stack(pn);
+	init(pn);
 	do
 	{
 		push(pn, stoi(num) % p);
@@ -59,7 +63,7 @@ string num_transfer(string num, int p)
 int str_palindrome(string &str)
 {
 	Stack st;
-	init_stack(st);
+	init(st);
 	for (char c : str)
 	{
 		push(st, c);
