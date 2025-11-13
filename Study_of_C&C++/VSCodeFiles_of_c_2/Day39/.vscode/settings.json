@@ -25,6 +25,8 @@
         "istream": "cpp",
         "xlocbuf": "cpp",
         "xlocmon": "cpp",
-        "*.rh": "cpp"
+        "*.rh": "cpp",
+        "compare": "cpp",
+        "ios": "cpp"
     }
 }
