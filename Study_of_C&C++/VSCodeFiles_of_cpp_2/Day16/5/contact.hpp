@@ -29,5 +29,5 @@ const std::string& Contact::get_phone() const {
 }
 
 void Contact::display() const {
-    std::cout << name << ", " << phone;
+    std::cout << "Name: " << name << ", Phone: " << phone << "\n";
 }

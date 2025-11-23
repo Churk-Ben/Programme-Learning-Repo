@@ -1,4 +1,4 @@
-# pragma  once
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -48,31 +48,37 @@ void ContactBook::remove(const std::string &name) {
 
 void ContactBook::find(const std::string &name) const {
     int i = index(name);
-
     if(i == -1) {
         std::cout << name << " not found!\n";
         return;
     }
-
-    contacts[i].display(); 
-    std::cout << '\n';
+    contacts[i].display();
 }
 
 void ContactBook::display() const {
-    for(auto &c: contacts) {
-        c.display(); 
-        std::cout << '\n';
+    if(contacts.empty()) {
+        std::cout << "Contact book is empty.\n";
+        return;
     }
+    std::cout << "Contact book:\n";
+    for(const auto &c: contacts)
+        c.display();
 }
 
 size_t ContactBook::size() const {
     return contacts.size();
 }
 
-// 待补足1：int index(const std::string &name) const;实现
-// 返回联系人在contacts内索引; 如不存在，返回-1
+int ContactBook::index(const std::string &name) const {
+    for(size_t i = 0; i < contacts.size(); ++i)
+        if(contacts[i].get_name() == name)
+            return static_cast<int>(i);
+    return -1;
+}
 
-
-
-// 待补足2：void ContactBook::sort();实现
-// 按姓名字典序升序排序通讯录
+void ContactBook::sort() {
+    std::sort(contacts.begin(), contacts.end(), 
+        [](const Contact &a, const Contact &b) {
+            return a.get_name() < b.get_name();
+        });
+}
