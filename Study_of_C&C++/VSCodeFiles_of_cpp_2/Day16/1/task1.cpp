@@ -1,7 +1,8 @@
 #include "window.hpp"
 #include <iostream>
 
-void test(){
+void test()
+{
     Window w("Demo");
     w.add_button("add");
     w.add_button("remove");
@@ -11,7 +12,8 @@ void test(){
     w.close();
 }
 
-int main() {
+int main()
+{
     std::cout << "用组合类模拟简单GUI:\n";
     test();
 }
